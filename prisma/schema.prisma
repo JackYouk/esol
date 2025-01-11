@@ -45,7 +45,9 @@ model Workspace {
   creatorId String
 
   sharedUsers User[]    @relation("WorkspaceMembers")
-  contexts    Context[]
+  context    Context?
+
+  notes String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -62,7 +64,7 @@ model Context {
   userId String
 
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workspaceId String
+  workspaceId String @unique
 
   messages Message[]
 
@@ -73,10 +75,15 @@ model Context {
   @@index([workspaceId])
 }
 
+enum MessageRole {
+    USER
+    SYSTEM
+}
+
 model Message {
   id      String @id @default(cuid())
   content String
-  role    String @default("user")
+  role    MessageRole
 
   context   Context @relation(fields: [contextId], references: [id], onDelete: Cascade)
   contextId String

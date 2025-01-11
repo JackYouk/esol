@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -21,11 +22,11 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-  } from "@/components/ui/select"
+} from "@/components/ui/select"
 import { CreateWorkspaceSchema } from "./schema"
 import { Textarea } from "../ui/textarea"
 import { useState } from "react"
-import { CirclePlus, FolderPlus, Loader2, SquarePlus } from "lucide-react"
+import { Loader2, SquarePlus } from "lucide-react"
 import { DialogFooter } from "../ui/dialog"
 import { AIModel } from "@prisma/client"
 
@@ -45,18 +46,24 @@ export default function CreateWorkSpaceForm() {
     async function onSubmit(data: z.infer<typeof CreateWorkspaceSchema>) {
         try {
             setSubmitting(true)
-            const response = await fetch("/api/create-workspace", {
+            const response = await fetch("/api/workspaces/create", {
                 method: "POST",
                 body: JSON.stringify(data),
             })
 
-            if (!response.ok) throw new Error("Failed to create workspace")
+            if (!response.ok) {
+                // Optional: Parse the error response for debugging
+                const errorData = await response.json();
+                throw new Error(`Failed to create workspace: ${errorData.message || response.statusText}`);
+            }
+            
+            const { id } = await response.json();
 
             toast({
                 title: "Workspace created successfully!",
             })
             setSubmitting(false)
-            router.push("/workspaces")
+            router.push("/workspaces/" + id)
             router.refresh()
         } catch (error) {
             toast({
@@ -153,13 +160,14 @@ export default function CreateWorkSpaceForm() {
                                     {...field}
                                 />
                             </FormControl>
+                            <FormDescription>PDFs must be equal to or less than 4.5MB</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
                 <DialogFooter>
-                    <Button className="w-full" type="submit">
+                    <Button className="w-full" type="submit" disabled={submitting}>
                         {!submitting ? (
                             <>Create <SquarePlus className="h-3 w-3" /></>
                         ) : (

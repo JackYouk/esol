@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { ArrowBigRight, PlusSquareIcon, User2Icon } from 'lucide-react'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
@@ -23,7 +23,7 @@ async function getWorkspaces(): Promise<Workspace[]> {
       include: {
         creator: true,
         sharedUsers: true,
-        contexts: true
+        context: true
       },
       // orderBy: {
       //   createdAt: 'desc' // Add this if you have a createdAt field
@@ -41,26 +41,26 @@ export default async function WorkSpaces() {
   const workspaces = await getWorkspaces()
 
   return (
-    <div className="h-screen w-screen bg-red flex flex-col items-center gap-10 pt-20">
+    <div className="min-h-screen w-screen bg-red flex flex-col items-center gap-10 pt-20 px-20 pb-10">
       <div className="font-bold text-2xl">Workspaces</div>
-      <div className="w-5/6 grid grid-cols-4 gap-4 ">
+      <div className="w-full xl:w-5/6 grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ">
         <CreateWorkspaceModal />
         {workspaces.map((workspace, index) => (
-          <Card key={workspace.id} className="min-h-40">
+          <Card key={workspace.id} className="min-h-40 relative">
             <CardHeader>
               <CardTitle>{workspace.title}</CardTitle>
               <CardDescription>{workspace.description}</CardDescription>
             </CardHeader>
-            <CardContent className="flex justify-end items-center space-x-3">
-              <Button size="icon" variant="secondary">
-                <User2Icon />
+            <div className="absolute bottom-4 right-4 flex justify-end items-center gap-2">
+              <Button variant="secondary">
+                Users <User2Icon className="w-4 h-4" />
               </Button>
               <Link href={"/workspaces/" + workspace.id}>
-                <Button size="icon">
-                  <ArrowBigRight className="" />
+                <Button>
+                  Open <ArrowBigRight className="w-4 h-4" />
                 </Button>
               </Link>
-            </CardContent>
+            </div>
           </Card>
         ))}
       </div>

@@ -1,12 +1,17 @@
 import { WorkspaceLayout } from "@/components/workspace/workspace-layout"
 import { prisma } from "@/lib/prisma"
-import { WorkspaceWithCreator } from "@/types"
+import { WorkspaceWithRelations } from "@/types"
 
-async function getWorkspace(workspaceId: string): Promise<WorkspaceWithCreator> {
+async function getWorkspace(workspaceId: string): Promise<WorkspaceWithRelations> {
   const workspace = await prisma.workspace.findUniqueOrThrow({
-    where: {id: workspaceId},
+    where: { id: workspaceId },
     include: {
-      creator: true
+      creator: true,
+      context: {
+        include: {
+          messages: true
+        }
+      }
     }
   })
   return workspace

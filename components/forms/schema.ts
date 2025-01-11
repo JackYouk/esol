@@ -15,5 +15,5 @@ export const CreateWorkspaceSchema = z.object({
         size: z.number(),
         base64: z.string()
     }).refine((file) => file.type === "application/pdf", "Must be a PDF")
-      .refine((file) => file.size <= 10 * 1024 * 1024, "File must be less than 10MB"),
+      .refine((file) => file.size <= 4.5 * 1024 * 1024, "File must be less than 4.5MB"),
 })

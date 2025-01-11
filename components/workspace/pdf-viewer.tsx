@@ -5,7 +5,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, ZoomIn, ZoomOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface PDFViewerProps {
@@ -14,8 +14,7 @@ interface PDFViewerProps {
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-export function DIsplayPDFViewer({ url }: PDFViewerProps) {
-
+export function DisplayPDFViewer({ url }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
@@ -30,16 +29,19 @@ export function DIsplayPDFViewer({ url }: PDFViewerProps) {
       console.log("Selected text:", selectedText);
     }
   };
-  // url = "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf"
+
   return (
     <div className="h-full w-full max-w-4xl mx-auto space-y-4">
       <div
         className="h-full bg-gray-50 overflow-auto max-h-[calc(100vh-12rem)] rounded-lg"
         onMouseUp={handleTextSelection}
       >
-
         <Document file={url} onLoadSuccess={onDocumentLoadSuccess}>
-          <Page pageNumber={pageNumber} />
+          <Page 
+            pageNumber={pageNumber} 
+            scale={scale}
+            className="flex justify-center"
+          />
         </Document>
       </div>
       <div className="flex items-center justify-between mb-4">
@@ -49,7 +51,7 @@ export function DIsplayPDFViewer({ url }: PDFViewerProps) {
             size="icon"
             onClick={() => setScale((prev) => Math.max(0.5, prev - 0.1))}
           >
-            <Search className="h-4 w-4 rotate-0" />
+            <ZoomOut className="h-4 w-4 rotate-0" />
           </Button>
           <span className="min-w-[4rem] text-center">
             {Math.round(scale * 100)}%
@@ -59,7 +61,7 @@ export function DIsplayPDFViewer({ url }: PDFViewerProps) {
             size="icon"
             onClick={() => setScale((prev) => Math.min(2, prev + 0.1))}
           >
-            <Search className="h-4 w-4 rotate-90" />
+            <ZoomIn className="h-4 w-4 rotate-90" />
           </Button>
         </div>
 
@@ -97,7 +99,7 @@ export function DIsplayPDFViewer({ url }: PDFViewerProps) {
         </div>
 
         <Button variant="outline" size="icon" asChild>
-          <a href={url} download target="_blank" rel="noopener noreferrer">
+          <a href={url + "?download=1"} download rel="noopener noreferrer">
             <Download className="h-4 w-4" />
           </a>
         </Button>

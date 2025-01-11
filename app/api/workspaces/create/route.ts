@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { CreateWorkspaceSchema } from '@/components/forms/schema';
+import { put } from "@vercel/blob";
+import { parsePDFContent } from './parsePdf';
+import { MessageRole } from '@prisma/client';
+import { createPrompt } from '@/lib/ai/prompts';
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,7 +28,17 @@ export async function POST(req: NextRequest) {
     const { title, description, pdf, aiModel } = validationResult.data;
 
     // Create vercel blob from pdf
+    const pdfBuffer = Buffer.from(pdf.base64, 'base64');
+    const { url } = await put(`pdfs/${pdf.name}`, pdfBuffer, {
+      access: 'public',
+      contentType: 'application/pdf'
+    })
 
+    // Parse pdf for use in context
+    const pdfContent = await parsePDFContent(pdfBuffer);
+
+    // Create initial message text
+    const initalMessageText = createPrompt("INIT", pdfContent.text)
 
     // Create workspace with nested relations
     const workspace = await prisma.workspace.create({
@@ -32,11 +46,11 @@ export async function POST(req: NextRequest) {
         title,
         description,
         activeAi: aiModel,
-        pdfUrl: "",
+        pdfUrl: url,
         creator: {
           connect: { id: userId }
         },
-        contexts: {
+        context: {
           create: {
             aiModel,
             vectordb: "", // Initialize empty for now, potentially will include vector db update in the future to reduce context
@@ -45,41 +59,19 @@ export async function POST(req: NextRequest) {
             },
             messages: {
               create: {
-                content: "",
+                role: MessageRole.USER,
+                content: initalMessageText,
               },
             },
           },
         },
       },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-          },
-        },
-        sharedUsers: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-          },
-        },
-        contexts: {
-          include: {
-            messages: {
-              select: {
-                id: true,
-                content: true,
-              },
-            },
-          },
-        },
+      select: {
+        id: true
       },
     });
 
-    return NextResponse.json(workspace);
+    return NextResponse.json({ id: workspace.id });
   } catch (error) {
     console.error('Error creating workspace:', error);
     if (error instanceof Error) {
