@@ -31,7 +31,7 @@ export function ChatInterface({ workspaceId, messages, creator }: ChatInterfaceP
 
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/new-message`, {
+      const response = await fetch(`/api/workspaces/new-message/${workspaceId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

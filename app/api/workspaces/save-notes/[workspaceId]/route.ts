@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { workspaceId: string } }
 ) {
   try {
     const { userId } = await auth()
@@ -12,7 +12,7 @@ export async function PUT(
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const workspaceId = params.id
+    const workspaceId = params.workspaceId
     const { notes } = await req.json()
 
     // Check if user has access to this workspace

@@ -19,7 +19,7 @@ export function Notes({ workspaceId, initialNotes = '' }: NotesProps) {
     debounce(async (content: string) => {
       try {
         setIsSaving(true)
-        const response = await fetch(`/api/workspaces/${workspaceId}/save-notes`, {
+        const response = await fetch(`/api/workspaces/save-notes/${workspaceId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
