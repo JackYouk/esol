@@ -17,6 +17,7 @@ export async function POST(
     }
 
     const workspaceId = params.id;
+    if(!workspaceId) return new NextResponse('Workspace ID not provided', { status: 403 });
     const { messageText } = await req.json();
 
     // Find workspace and select for messages
