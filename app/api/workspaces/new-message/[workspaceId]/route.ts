@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { workspaceId: string } }
+  { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -16,7 +16,7 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const workspaceId = params.workspaceId;
+    const { workspaceId } = await params;
     if(!workspaceId) return new NextResponse('Workspace ID not provided', { status: 403 });
     const { messageText } = await req.json();
 
