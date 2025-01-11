@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+enum UserType {
+  TEACHER
+  STUDENT
+}
+
+enum AIModel {
+  GPT
+  CLAUDE
+  LLAMA
+}
+
+model User {
+  id                String      @id // Clerk will provide this ID
+  username          String
+  email             String      @unique
+  type              UserType
+  workspaces        Workspace[] @relation("WorkspaceMembers")
+  createdWorkspaces Workspace[] @relation("WorkspaceCreator")
+  contexts          Context[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Workspace {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  pdfUrl      String
+  activeAi    AIModel
+
+  creator   User   @relation("WorkspaceCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId String
+
+  sharedUsers User[]    @relation("WorkspaceMembers")
+  contexts    Context[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([creatorId])
+}
+
+model Context {
+  id       String  @id @default(cuid())
+  vectordb String
+  aiModel  AIModel
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model Message {
+  id      String @id @default(cuid())
+  content String
+  role    String @default("user")
+
+  context   Context @relation(fields: [contextId], references: [id], onDelete: Cascade)
+  contextId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contextId])
+}
