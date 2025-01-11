@@ -41,7 +41,6 @@ export default async function DashboardLayout({
 
   return (
     <>
-      <ClerkProvider>
         <SignedOut>
           <div className="w-full h-screen flex flex-col items-center justify-center font-[family-name:var(--font-geist-sans)]">
             <div className="text-2xl mb-2">ESOL Ai</div>
@@ -59,7 +58,6 @@ export default async function DashboardLayout({
           </div>
           {children}
         </SignedIn>
-      </ClerkProvider>
     </>
   );
 }
