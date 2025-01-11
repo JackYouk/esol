@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import {
-  ClerkProvider,
   SignInButton,
   SignedIn,
   SignedOut,
