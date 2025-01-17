@@ -6,28 +6,48 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, User } from "@clerk/nextjs/server";
 import Link from "next/link";
 
-async function checkAndCreateUser(user: any | null) {
-  if (!user) return null
+async function checkAndCreateUser(user: User | null) {
+  if (!user) return null;
 
-  const existingUser = await prisma.user.findUnique({
-    where: { id: user.id }
-  })
+  try {
+    // First check if user exists by ID
+    const existingUserById = await prisma.user.findUnique({
+      where: { id: user.id }
+    });
 
-  if (!existingUser) {
+    if (existingUserById) return existingUserById;
+
+    // If not found by ID, check by email to handle the unique constraint
+    const email = user.emailAddresses.find(
+      email => email.id === user.primaryEmailAddressId
+    )?.emailAddress || user.emailAddresses[0].emailAddress;
+
+    const existingUserByEmail = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (existingUserByEmail) {
+      // If user exists with email but different ID, you might want to handle this case
+      // For now, return existing user
+      return existingUserByEmail;
+    }
+
+    // Create new user if doesn't exist by ID or email
     return await prisma.user.create({
       data: {
         id: user.id,
         type: 'STUDENT',
-        email: user.emailAddresses[0]?.emailAddress || '',
+        email: email,
         username: user.username || user.firstName || 'User'
       }
-    })
+    });
+  } catch (error) {
+    console.error('Error in checkAndCreateUser:', error);
+    throw error;
   }
-
-  return existingUser
 }
 
 export default async function DashboardLayout({

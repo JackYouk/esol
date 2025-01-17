@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function PUT(
@@ -8,9 +8,18 @@ export async function PUT(
 ) {
   try {
     const { userId } = await auth()
-    if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 })
+    const user = await currentUser()
+    if (!userId || !user) {
+      return new NextResponse('Unauthorized', { status: 401 });
     }
+
+    const email = user.emailAddresses.find(
+      email => email.id === user.primaryEmailAddressId
+    )?.emailAddress || user.emailAddresses[0].emailAddress;
+
+    const userData = await prisma.user.findUniqueOrThrow({
+      where: {email: email}
+    })
 
     const { workspaceId } = await params;
     const { notes } = await req.json()
@@ -20,8 +29,8 @@ export async function PUT(
       where: {
         id: workspaceId,
         OR: [
-          { creatorId: userId },
-          { sharedUsers: { some: { id: userId } } }
+          { creatorId: userData.id },
+          { sharedUsers: { some: { id: userData.id } } }
         ]
       }
     })

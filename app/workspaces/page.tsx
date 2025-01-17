@@ -1,23 +1,33 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { ArrowBigRight, PlusSquareIcon, User2Icon } from 'lucide-react'
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { Button } from '@/components/ui/button'
 import { Workspace } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { CreateWorkspaceModal } from '@/components/forms/create-workspace-modal'
 
 async function getWorkspaces(): Promise<Workspace[]> {
-  const { userId } = await auth()
-  
-  if (!userId) return []
-
   try {
+    const { userId } = await auth()
+    const user = await currentUser()
+    if (!userId || !user) {
+      throw new Error("Unauthenticated")
+    }
+
+    const email = user.emailAddresses.find(
+      email => email.id === user.primaryEmailAddressId
+    )?.emailAddress || user.emailAddresses[0].emailAddress;
+
+    const userData = await prisma.user.findUniqueOrThrow({
+      where: { email: email }
+    })
+
     const workspaces = await prisma.workspace.findMany({
       where: {
         OR: [
-          { creatorId: userId },
-          { sharedUsers: { some: { id: userId } } }
+          { creatorId: userData.id },
+          { sharedUsers: { some: { id: userData.id } } }
         ]
       },
       include: {
@@ -25,9 +35,9 @@ async function getWorkspaces(): Promise<Workspace[]> {
         sharedUsers: true,
         context: true
       },
-      // orderBy: {
-      //   createdAt: 'desc' // Add this if you have a createdAt field
-      // }
+      orderBy: {
+        createdAt: 'desc' // Add this if you have a createdAt field
+      }
     })
 
     return workspaces

@@ -1,10 +1,13 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { ArrowRightSquareIcon } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Message } from "@prisma/client"
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
 
 interface ChatInterfaceProps {
   workspaceId: string
@@ -12,11 +15,14 @@ interface ChatInterfaceProps {
   creator: {
     username: string
   }
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
 }
 
-export function ChatInterface({ workspaceId, messages, creator }: ChatInterfaceProps) {
+export function ChatInterface({ workspaceId, messages, creator, setMessages }: ChatInterfaceProps) {
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  
   const welcomeMessage: Message = {
     id: 'welcome',
     content: `Welcome to your workspace! I'm here to help you explore and understand your document. What would you like to know?`,
@@ -25,7 +31,15 @@ export function ChatInterface({ workspaceId, messages, creator }: ChatInterfaceP
     createdAt: new Date(),
     updatedAt: new Date()
   }
-  const [displayMessages, setDisplayMessages] = useState<Message[]>([welcomeMessage, ...messages.slice(1)])
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
   const handleSubmit = async () => {
     if (!inputMessage.trim() || isLoading) return
 
@@ -44,7 +58,7 @@ export function ChatInterface({ workspaceId, messages, creator }: ChatInterfaceP
       }
 
       const data = await response.json()
-      setDisplayMessages(prev => [...prev, data.newUserMessage, data.newSystemMessage])
+      setMessages(prev => [...prev, data.newUserMessage, data.newSystemMessage])
       setInputMessage('')
     } catch (error) {
       console.error('Error sending message:', error)
@@ -62,16 +76,34 @@ export function ChatInterface({ workspaceId, messages, creator }: ChatInterfaceP
 
   return (
     <div className="w-full h-full px-3 py-2 flex flex-col justify-between">
-      <div className="space-y-1 text-sm text-gray-500 overflow-y-auto">
-        {displayMessages.map((message, index) => (
-          <div key={index}>
-            <span className="font-bold">
+      <div className="space-y-4 text-sm text-gray-500 overflow-y-auto">
+        {messages.map((message, index) => (
+          <div key={index} className="prose prose-sm max-w-none">
+            <span className="font-bold text-gray-700">
               {message.role === 'SYSTEM' ? 'Esol Bot' : creator.username}:
             </span>{' '}
-            {message.content}
-            <br />
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm, remarkBreaks]}
+              components={{
+                p: ({node, ...props}) => <p className="inline" {...props} />,
+                a: ({node, ...props}) => <a className="text-blue-500 hover:text-blue-600" {...props} />,
+                ul: ({node, ...props}) => <ul className="list-disc pl-6 my-2" {...props} />,
+                ol: ({node, ...props}) => <ol className="list-decimal pl-6 my-2" {...props} />,
+                li: ({node, ...props}) => <li className="my-1" {...props} />,
+                code: ({node, ...props}) => 
+                <code className="block bg-gray-100 p-3 rounded-lg my-2 text-sm overflow-x-auto" {...props} />,
+                pre: ({node, ...props}) => <pre className="bg-transparent p-0" {...props} />,
+                blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-200 pl-4 my-2 italic" {...props} />,
+                h1: ({node, ...props}) => <h1 className="text-xl font-bold my-3" {...props} />,
+                h2: ({node, ...props}) => <h2 className="text-lg font-bold my-2" {...props} />,
+                h3: ({node, ...props}) => <h3 className="text-base font-bold my-2" {...props} />
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <div className="space-y-2">
         <Textarea

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import { CreateWorkspaceSchema } from '@/components/forms/schema';
 import { put } from "@vercel/blob";
 import { parsePDFContent } from './parsePdf';
 import { MessageRole } from '@prisma/client';
@@ -10,22 +9,20 @@ import { createPrompt } from '@/lib/ai/prompts';
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
-    if (!userId) {
+    const user = await currentUser()
+    if (!userId || !user) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Parse and validate the request body
-    const body = await req.json();
-    const validationResult = CreateWorkspaceSchema.safeParse(body);
+    const email = user.emailAddresses.find(
+      email => email.id === user.primaryEmailAddressId
+    )?.emailAddress || user.emailAddresses[0].emailAddress;
 
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { errors: validationResult.error.issues },
-        { status: 400 }
-      );
-    }
+    const userData = await prisma.user.findUniqueOrThrow({
+      where: { email: email }
+    })
 
-    const { title, description, pdf, aiModel } = validationResult.data;
+    const { title, description, pdf, aiModel } = await req.json()
 
     // Create vercel blob from pdf
     const pdfBuffer = Buffer.from(pdf.base64, 'base64');
@@ -36,9 +33,10 @@ export async function POST(req: NextRequest) {
 
     // Parse pdf for use in context
     const pdfContent = await parsePDFContent(pdfBuffer);
+    console.log(pdfContent)
 
     // Create initial message text
-    const initalMessageText = createPrompt("INIT", pdfContent.text)
+    const initalMessageText = createPrompt("INIT", { studyText: pdfContent.text })
 
     // Create workspace with nested relations
     const workspace = await prisma.workspace.create({
@@ -48,14 +46,14 @@ export async function POST(req: NextRequest) {
         activeAi: aiModel,
         pdfUrl: url,
         creator: {
-          connect: { id: userId }
+          connect: { id: userData.id }
         },
         context: {
           create: {
             aiModel,
             vectordb: "", // Initialize empty for now, potentially will include vector db update in the future to reduce context
             user: {
-              connect: { id: userId }
+              connect: { id: userData.id }
             },
             messages: {
               create: {

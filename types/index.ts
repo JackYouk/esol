@@ -16,3 +16,5 @@ export type WorkspaceWithRelations = Prisma.WorkspaceGetPayload<{
         }
     }
 }>
+
+export type ToolType = "GRAMMAR" | "VOCABULARY" | "SPELLING" | "NONE";

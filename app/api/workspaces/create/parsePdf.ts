@@ -5,35 +5,12 @@ interface ParserError {
 }
 
 interface PDFParseResult {
-  text: string;        // Raw text content
-  data: {             // Full PDF data with styling and structure
-    Meta?: {          // PDF metadata
-      PDFFormatVersion?: string;
-      IsAcroFormPresent?: boolean;
-      IsXFAPresent?: boolean;
-      Creator?: string;
-      Producer?: string;
-      CreationDate?: string;
-      ModDate?: string;
-      Metadata?: Record<string, string>;
-    };
-    Pages: Array<{
-      Height: number;
-      Width: number;
-      HLines: any[];
-      VLines: any[];
-      Fills: any[];
-      Texts: any[];
-      Fields: any[];
-      Boxsets: any[];
-    }>;
-  };
+  text: string;
 }
 
 export async function parsePDFContent(pdfBuffer: Buffer): Promise<PDFParseResult> {
   return new Promise((resolve, reject) => {
-    // Initialize parser without raw text mode to get full data
-    const pdfParser = new PDFParser();
+    const pdfParser = new PDFParser(null, true);
 
     pdfParser.on("pdfParser_dataError", (errData: ParserError) => {
       reject(new Error(typeof errData.parserError === 'string' 
@@ -43,12 +20,8 @@ export async function parsePDFContent(pdfBuffer: Buffer): Promise<PDFParseResult
 
     pdfParser.on("pdfParser_dataReady", (pdfData) => {
       try {
-        // Get both the raw text and the full parsed data
-        const result: PDFParseResult = {
-          text: pdfParser.getRawTextContent(),
-          data: pdfData
-        };
-        resolve(result);
+        const text = pdfParser.getRawTextContent().replace(/\r\n/g, "\n");
+        resolve({ text });
       } catch (error) {
         reject(error instanceof Error ? error : new Error('Failed to get PDF content'));
       }

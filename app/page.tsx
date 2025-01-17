@@ -12,7 +12,7 @@ export default function Home() {
           An AI-powered platform revolutionizing how ESL students interact with classroom materials
         </p>
         <div className="flex gap-4">
-          <Link href="/workspaces">
+          <Link href="/login">
             <Button className="text-lg px-6 py-6">
               Get Started
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -29,7 +29,7 @@ export default function Home() {
 
       {/* Features Grid */}
       <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           <FeatureCard
             icon={<Brain className="h-8 w-8 text-blue-500" />}
             title="AI-Powered Learning"
@@ -54,11 +54,10 @@ export default function Home() {
       </div>
 
       {/* Demo Section */}
-      <div className="bg-white py-16">
+      {/* <div className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">See How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Demo Image */}
             <div className="bg-gray-100 rounded-lg overflow-hidden">
               <img
                 src="/api/placeholder/600/400"
@@ -66,7 +65,6 @@ export default function Home() {
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* Demo Video */}
             <div className="bg-gray-100 rounded-lg overflow-hidden">
               <img
                 src="/api/placeholder/600/400"
@@ -76,7 +74,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Support Section */}
       <div className="bg-blue-50 py-16">
