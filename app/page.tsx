@@ -12,7 +12,7 @@ export default function Home() {
           An AI-powered platform revolutionizing how ESL students interact with classroom materials
         </p>
         <div className="flex gap-4">
-          <Link href="/login">
+          <Link href="/workspaces">
             <Button className="text-lg px-6 py-6">
               Get Started
               <ArrowRight className="ml-2 h-5 w-5" />

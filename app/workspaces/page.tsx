@@ -11,9 +11,7 @@ async function getWorkspaces(): Promise<Workspace[]> {
   try {
     const { userId } = await auth()
     const user = await currentUser()
-    if (!userId || !user) {
-      throw new Error("Unauthenticated")
-    }
+    if (!userId || !user) return []
 
     const email = user.emailAddresses.find(
       email => email.id === user.primaryEmailAddressId

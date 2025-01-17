@@ -37,7 +37,7 @@ export function WorkspaceLayout({ workspace }: WorkspaceProps) {
     if (initialMessages.length === 0) {
       return [welcomeMessage];
     }
-    return [welcomeMessage, ...initialMessages];
+    return [welcomeMessage, ...initialMessages.slice(1)];
   });
 
   const addMessage = (message: string) => {
