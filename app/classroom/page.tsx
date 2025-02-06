@@ -5,6 +5,8 @@ import { getOrCreateUser } from "@/lib/user";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic"
+
 async function getClassroomMembers() {
     "use server"
     try {
