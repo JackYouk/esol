@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 async function getClassroomMembers() {
+    "use server"
     try {
         const { orgId, has } = await auth()
         const permission = has({ role: "org:admin" })
