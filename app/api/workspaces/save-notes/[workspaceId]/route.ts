@@ -24,14 +24,9 @@ export async function PUT(
     const { workspaceId } = await params;
     const { notes } = await req.json()
 
-    // Check if user has access to this workspace
-    const workspace = await prisma.workspace.findFirst({
+    const workspace = await prisma.workspace.findUniqueOrThrow({
       where: {
         id: workspaceId,
-        OR: [
-          { creatorId: userData.id },
-          { sharedUsers: { some: { id: userData.id } } }
-        ]
       }
     })
 
