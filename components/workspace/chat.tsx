@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { ArrowRightSquareIcon } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
-import { Message } from "@prisma/client"
+import { Message, User } from "@prisma/client"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
@@ -12,13 +12,11 @@ import remarkBreaks from 'remark-breaks'
 interface ChatInterfaceProps {
   workspaceId: string
   messages: Message[]
-  creator: {
-    username: string
-  }
+  user: User
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>
 }
 
-export function ChatInterface({ workspaceId, messages, creator, setMessages }: ChatInterfaceProps) {
+export function ChatInterface({ workspaceId, messages, user, setMessages }: ChatInterfaceProps) {
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -80,7 +78,7 @@ export function ChatInterface({ workspaceId, messages, creator, setMessages }: C
         {messages.map((message, index) => (
           <div key={index} className="prose prose-sm max-w-none">
             <span className="font-bold text-gray-700">
-              {message.role === 'SYSTEM' ? 'Esol Bot' : creator.username}:
+              {message.role === 'SYSTEM' ? 'Esol Bot' : user.name}:
             </span>{' '}
             <ReactMarkdown 
               remarkPlugins={[remarkGfm, remarkBreaks]}

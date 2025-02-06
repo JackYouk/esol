@@ -6,7 +6,7 @@ async function getWorkspace(workspaceId: string): Promise<WorkspaceWithRelations
   const workspace = await prisma.workspace.findUniqueOrThrow({
     where: { id: workspaceId },
     include: {
-      creator: true,
+      user: true,
       context: {
         include: {
           messages: true

@@ -55,12 +55,12 @@ export function WorkspaceLayout({ workspace }: WorkspaceProps) {
 
   return (
     <SelectedTextProvider>
-      <div className="p-10 pt-16 h-screen">
+      <div className="px-8 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="text-xl font-bold">{workspace?.title}</div>
             <Link href="/workspaces"><Button size="icon" variant="outline"><HomeIcon /></Button></Link>
-            <Button size="icon" variant="outline"><UserPlus2Icon /></Button>
+            {/* <Button size="icon" variant="outline"><UserPlus2Icon /></Button> */}
           </div>
           <div className="text-sm text-gray-500 italic">
             last updated {workspace.updatedAt.toLocaleDateString('en-US')} at {workspace.updatedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase()}
@@ -80,7 +80,7 @@ export function WorkspaceLayout({ workspace }: WorkspaceProps) {
               </ResizablePanel>
               <ResizableHandle />
               <ResizablePanel>
-                <ChatInterface workspaceId={workspace.id} messages={messages} creator={workspace.creator} setMessages={setMessages} />
+                <ChatInterface workspaceId={workspace.id} messages={messages} user={workspace.user} setMessages={setMessages} />
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>

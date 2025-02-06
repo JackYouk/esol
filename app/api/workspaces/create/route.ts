@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { put } from "@vercel/blob";
 import { parsePDFContent } from './parsePdf';
@@ -8,20 +8,8 @@ import { createPrompt } from '@/lib/ai/prompts';
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    const user = await currentUser()
-    if (!userId || !user) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
-
-    const email = user.emailAddresses.find(
-      email => email.id === user.primaryEmailAddressId
-    )?.emailAddress || user.emailAddresses[0].emailAddress;
-
-    const userData = await prisma.user.findUniqueOrThrow({
-      where: { email: email }
-    })
-
+    const { userId, orgId } = await auth();
+    if (!userId) throw new Error("Unauthenticated")
     const { title, description, pdf, aiModel } = await req.json()
 
     // Create vercel blob from pdf
@@ -38,6 +26,15 @@ export async function POST(req: NextRequest) {
     // Create initial message text
     const initalMessageText = createPrompt("INIT", { studyText: pdfContent.text })
 
+    // Get or create classroom
+    let classroom
+    if (orgId) {
+      classroom = await prisma.classroom.findUnique({ where: { id: orgId } })
+      if (!classroom) {
+        classroom = await prisma.classroom.create({ data: { id: orgId } })
+      }
+    }
+
     // Create workspace with nested relations
     const workspace = await prisma.workspace.create({
       data: {
@@ -45,16 +42,18 @@ export async function POST(req: NextRequest) {
         description,
         activeAi: aiModel,
         pdfUrl: url,
-        creator: {
-          connect: { id: userData.id }
+        user: {
+          connect: { id: userId }
         },
+        ...(orgId && classroom && {
+          classroom: {
+            connect: { id: orgId }
+          }
+        }),
         context: {
           create: {
             aiModel,
             vectordb: "", // Initialize empty for now, potentially will include vector db update in the future to reduce context
-            user: {
-              connect: { id: userData.id }
-            },
             messages: {
               create: {
                 role: MessageRole.USER,

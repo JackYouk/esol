@@ -16,7 +16,7 @@ export function CreateWorkspaceModal() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Card className="cursor-pointer font-bold w-full min-h-40 h-full flex flex-col justify-center items-center text-sm hover:bg-secondary">
+                <Card className="cursor-pointer shadow-md font-bold w-full min-h-40 h-full flex flex-col justify-center items-center text-sm hover:bg-secondary">
                     <PlusSquare className="w-16 h-16 mb-1" />
                     Create Workspace
                 </Card>
