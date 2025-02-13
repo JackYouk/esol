@@ -21,15 +21,6 @@ export function ChatInterface({ workspaceId, messages, user, setMessages }: Chat
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
-  const welcomeMessage: Message = {
-    id: 'welcome',
-    content: `Welcome to your workspace! I'm here to help you explore and understand your document. What would you like to know?`,
-    role: 'SYSTEM',
-    contextId: '',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }

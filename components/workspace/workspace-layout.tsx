@@ -8,13 +8,11 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { DisplayPDFViewer } from "@/components/workspace/pdf-viewer";
-import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { WorkspaceWithRelations } from "@/types";
 import { ChatInterface } from "./chat";
 import { Notes } from "./notes";
 import { SelectedTextProvider } from "./selected-text-provider";
-import { LearningToolbar } from "./toolbar";
 import { useState } from "react";
 import { Message, MessageRole } from "@prisma/client";
 
