@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Book, Users, Mic, PenTool, Brain } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Hero Section */}
       <div className="w-full py-20 flex flex-col items-center justify-center">
-        <h1 className="text-5xl font-bold text-center mb-6">ESOL AI</h1>
+        {/* <h1 className="text-5xl font-bold text-center mb-6">ESOL AI</h1> */}
+        <Logo className="text-5xl" iconClassName="w-10 h-10" />
         <p className="text-xl text-gray-600 text-center max-w-2xl mb-8">
           An AI-powered platform revolutionizing how ESL students interact with classroom materials
         </p>

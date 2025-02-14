@@ -15,7 +15,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 // });
 
 export const metadata: Metadata = {
-  title: "ESOL Ai",
+  title: "ESOLeap",
   description: "Breaking through the language barrier.",
 };
 
